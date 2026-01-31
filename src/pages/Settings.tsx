@@ -1,8 +1,10 @@
-import { ArrowLeft, Shield, Bell, MapPin, Mic, Volume2, Vibrate, Moon, Info } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowLeft, Shield, Bell, MapPin, Mic, Volume2, Vibrate, Moon, Info, LogOut } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 import { Switch } from '@/components/ui/switch';
 import { NavBar } from '@/components/NavBar';
 import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 const Settings = () => {
   const [settings, setSettings] = useState({
@@ -145,6 +147,27 @@ const Settings = () => {
             <br />
             Please ensure all permissions are granted.
           </p>
+        </div>
+
+        {/* Logout Button */}
+        <div className="px-1 pt-4 pb-8">
+          <button
+            onClick={async () => {
+              try {
+                const { error } = await supabase.auth.signOut();
+                if (error) throw error;
+                localStorage.removeItem('guardian_user');
+                toast.success('Logged out successfully');
+                window.location.href = '/';
+              } catch (error: any) {
+                toast.error(error.message);
+              }
+            }}
+            className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-destructive/10 text-destructive hover:bg-destructive/20 transition-all font-bold group"
+          >
+            <LogOut className="w-5 h-5 group-active:scale-90 transition-transform" />
+            Sign Out of Safe walk
+          </button>
         </div>
       </main>
 

@@ -26,37 +26,44 @@ const MapComponent = ({ className }: MapComponentProps) => {
     const [position, setPosition] = useState<[number, number] | null>(null);
 
     useEffect(() => {
-        const getCurrentLocation = async () => {
+        let watchId: string | null = null;
+
+        const setupLocation = async () => {
             try {
                 const permission = await Geolocation.checkPermissions();
-                if (permission.location === 'denied' || permission.location === 'prompt') {
+                if (permission.location !== 'granted') {
                     await Geolocation.requestPermissions();
                 }
 
+                // Initial position
                 const coordinates = await Geolocation.getCurrentPosition({
-                    enableHighAccuracy: true
+                    enableHighAccuracy: true,
+                    timeout: 5000
                 });
-
                 setPosition([coordinates.coords.latitude, coordinates.coords.longitude]);
+
+                // Continuous watching
+                watchId = await Geolocation.watchPosition(
+                    { enableHighAccuracy: true, timeout: 5000 },
+                    (pos, err) => {
+                        if (pos) {
+                            setPosition([pos.coords.latitude, pos.coords.longitude]);
+                        }
+                    }
+                );
             } catch (error) {
-                console.error('Error getting location:', error);
-                // Fallback to default location (Delhi) if error
+                console.error('Map location error:', error);
+                // Fallback to Delhi if no location after 5s
                 if (!position) setPosition([28.6139, 77.2090]);
             }
         };
 
-        getCurrentLocation();
-
-        // Watch position updates
-        const watchId = Geolocation.watchPosition({ enableHighAccuracy: true }, (position, err) => {
-            if (position) {
-                setPosition([position.coords.latitude, position.coords.longitude]);
-            }
-        });
+        setupLocation();
 
         return () => {
-            Geolocation.clearWatch({ id: Promise.resolve(watchId).then(id => id) as any });
-            // Note: the return type of watchPosition is Promise<string> in newer capacitor versions, handling might vary slightly
+            if (watchId) {
+                Geolocation.clearWatch({ id: watchId });
+            }
         };
     }, []);
 

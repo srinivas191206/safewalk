@@ -53,7 +53,7 @@ export const useVoiceTrigger = ({ onTrigger, isActive }: VoiceTriggerOptions) =>
         };
 
         const checkKeywords = (matches: string[]) => {
-            const keywords = ['help', 'emergency', 'save me', 'danger'];
+            const keywords = ['help', 'emergency', 'save me', 'danger', 'help me', 'i am in danger', 'sos'];
             const lowerMatches = matches.map(m => m.toLowerCase());
 
             const found = keywords.some(keyword =>

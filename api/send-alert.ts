@@ -11,13 +11,8 @@ export default async function handler(
     request: VercelRequest,
     response: VercelResponse
 ) {
-    // CORS Configuration
-    const allowedOrigins = ['http://localhost:8080', 'http://localhost:5173', 'https://safewalk.vercel.app'];
-    const origin = request.headers.origin as string;
-
-    if (allowedOrigins.includes(origin) || !origin) {
-        response.setHeader('Access-Control-Allow-Origin', origin || '*');
-    }
+    // CORS Configuration - Allow all for emergency safety app testing
+    response.setHeader('Access-Control-Allow-Origin', '*');
 
     response.setHeader('Access-Control-Allow-Credentials', 'true');
     response.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');

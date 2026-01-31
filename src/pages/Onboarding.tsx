@@ -193,7 +193,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
                     maxLength={6}
                   />
                   <p className="text-xs text-muted-foreground mt-2 text-center">
-                    Demo: Enter any 6 digits
+                    Please enter the 6-digit code sent to your phone
                   </p>
                 </div>
                 <Button onClick={handleVerifyOtp} className="w-full h-12">
