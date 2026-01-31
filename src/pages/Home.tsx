@@ -1,10 +1,11 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { PanicButton } from '@/components/PanicButton';
 import { StatusBar } from '@/components/StatusBar';
 import { CountdownModal } from '@/components/CountdownModal';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
 import { QuickActions } from '@/components/QuickActions';
 import { NavBar } from '@/components/NavBar';
+import MapComponent from '@/components/MapComponent';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { useOfflineQueue } from '@/hooks/useOfflineQueue';
 import { useLocation } from '@/hooks/useLocation';
@@ -13,24 +14,59 @@ import type { EmergencyTrigger, EmergencyEvent } from '@/types/emergency';
 import { toast } from 'sonner';
 import { Users, Radio } from 'lucide-react';
 
+import { KeepAwake } from '@capacitor-community/keep-awake';
+import { useCrashDetection } from '@/hooks/useCrashDetection';
+import { useVoiceTrigger } from '@/hooks/useVoiceTrigger';
+import { useVoiceFeedback } from '@/hooks/useVoiceFeedback';
+import { useSafetyAudio } from '@/hooks/useSafetyAudio';
+
 const Home = () => {
-  const [guardianActive, setGuardianActive] = useState(true);
+  const [guardianActive, setGuardianActive] = useState(false);
   const [showCountdown, setShowCountdown] = useState(false);
   const [currentTrigger, setCurrentTrigger] = useState<EmergencyTrigger>('manual');
+
+  const { speak } = useVoiceFeedback();
+  const { startEmergencyRecording } = useSafetyAudio();
 
   const isOnline = useOnlineStatus();
   const { pendingCount, addToQueue } = useOfflineQueue();
   const { latitude, longitude, getGoogleMapsLink, hasLocation } = useLocation();
   const { contacts, hasMinimumContacts } = useEmergencyContacts();
 
-  const handlePanicPress = useCallback(() => {
+  // Keep Screen On when Guardian Mode is Active
+  useEffect(() => {
+    const manageWakeLock = async () => {
+      if (guardianActive) {
+        await KeepAwake.keepAwake();
+      } else {
+        await KeepAwake.allowSleep();
+      }
+    };
+    manageWakeLock();
+  }, [guardianActive]);
+
+  // Handler for all triggers
+  const handleTrigger = useCallback((type: EmergencyTrigger) => {
     if (!hasMinimumContacts) {
-      toast.error('Please add at least 2 emergency contacts first');
+      toast.error('Add contacts to enable Guardian Mode');
       return;
     }
-    setCurrentTrigger('manual');
+    setCurrentTrigger(type);
     setShowCountdown(true);
   }, [hasMinimumContacts]);
+
+  const handlePanicPress = () => handleTrigger('manual');
+
+  // Native Sensors
+  useCrashDetection({
+    isActive: guardianActive,
+    onCrashDetected: () => handleTrigger('accident')
+  });
+
+  useVoiceTrigger({
+    isActive: guardianActive,
+    onTrigger: () => handleTrigger('voice')
+  });
 
   const handleCountdownCancel = useCallback(() => {
     setShowCountdown(false);
@@ -39,6 +75,10 @@ const Home = () => {
 
   const handleCountdownComplete = useCallback(async () => {
     setShowCountdown(false);
+
+    // Trigger AI Voice and Recording
+    speak("Emergency detected. Sharing your location. Stay calm.");
+    startEmergencyRecording();
 
     const event: EmergencyEvent = {
       id: crypto.randomUUID(),
@@ -55,7 +95,8 @@ const Home = () => {
     if (isOnline) {
       // Call Backend API
       try {
-        const response = await fetch('/api/send-alert', {
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        const response = await fetch(`${apiUrl}/api/send-alert`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -106,16 +147,40 @@ const Home = () => {
 
       {/* Main content */}
       <main className="flex flex-col items-center justify-center px-4 py-8">
-        <div className="flex-1 flex items-center justify-center min-h-[400px]">
+        <div className="flex-1 flex flex-col items-center justify-center min-h-[400px] gap-8">
           <PanicButton
             onTrigger={handlePanicPress}
-            disabled={!guardianActive}
+            disabled={false} // Always allow manual panic
           />
+
+          <div className="flex flex-col gap-3 w-full max-w-xs">
+            <button
+              onClick={() => setGuardianActive(!guardianActive)}
+              className={`px-6 py-3 rounded-full font-semibold transition-all ${guardianActive
+                ? 'bg-primary text-primary-foreground shadow-lg scale-105 ring-4 ring-primary/20'
+                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                }`}
+            >
+              {guardianActive ? '🛡️ Guardian Mode ACTIVE' : 'Turn On Guardian Mode'}
+            </button>
+
+            <button
+              onClick={() => handleTrigger('accident')}
+              className="px-6 py-3 rounded-full font-semibold bg-orange-100 text-orange-600 hover:bg-orange-200 transition-all border border-orange-200"
+            >
+              🚗 Simulate Crash (Demo)
+            </button>
+          </div>
         </div>
 
         {/* Quick actions */}
         <div className="w-full max-w-md mt-8">
           <QuickActions />
+        </div>
+
+        {/* Live Map */}
+        <div className="w-full max-w-md mt-6 h-48">
+          <MapComponent className="h-full w-full" />
         </div>
 
         {/* Info cards */}

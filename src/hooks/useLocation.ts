@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Geolocation } from '@capacitor/geolocation';
 
 interface LocationState {
   latitude: number | null;
@@ -19,41 +20,35 @@ export const useLocation = () => {
     lastUpdated: null,
   });
 
-  const getCurrentLocation = useCallback(() => {
-    if (!navigator.geolocation) {
-      setLocation(prev => ({
-        ...prev,
-        error: 'Geolocation is not supported by this browser',
-      }));
-      return;
-    }
+  const getCurrentLocation = useCallback(async () => {
+    try {
+      const permission = await Geolocation.checkPermissions();
+      if (permission.location !== 'granted') {
+        await Geolocation.requestPermissions();
+      }
 
-    setLocation(prev => ({ ...prev, loading: true, error: null }));
+      setLocation(prev => ({ ...prev, loading: true, error: null }));
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-          loading: false,
-          error: null,
-          lastUpdated: new Date(),
-        });
-      },
-      (error) => {
-        setLocation(prev => ({
-          ...prev,
-          loading: false,
-          error: error.message,
-        }));
-      },
-      {
+      const position = await Geolocation.getCurrentPosition({
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 60000,
-      }
-    );
+      });
+
+      setLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
+        loading: false,
+        error: null,
+        lastUpdated: new Date(),
+      });
+    } catch (error: any) {
+      setLocation(prev => ({
+        ...prev,
+        loading: false,
+        error: error.message,
+      }));
+    }
   }, []);
 
   // Get location on mount

@@ -28,7 +28,18 @@ const Contacts = () => {
       return;
     }
 
-    await addContact(formData);
+    if (formData.phone.length < 10) {
+      toast.error('Please enter a valid 10-digit phone number');
+      return;
+    }
+
+    // Format with +91
+    const contactToAdd = {
+      ...formData,
+      phone: `+91${formData.phone}`
+    };
+
+    await addContact(contactToAdd);
     setFormData({ name: '', phone: '', relationship: '', whatsappEnabled: true });
     setShowForm(false);
     // Hook already toasts success
@@ -88,14 +99,22 @@ const Contacts = () => {
 
               <div>
                 <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                  placeholder="+91 98765 43210"
-                  className="mt-1"
-                />
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    value="+91"
+                    disabled
+                    className="w-16 text-center"
+                  />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder="98765 43210"
+                    className="flex-1"
+                    maxLength={10}
+                  />
+                </div>
               </div>
 
               <div>
