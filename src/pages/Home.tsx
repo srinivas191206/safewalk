@@ -18,16 +18,11 @@ import { supabase } from '@/lib/supabase';
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { useCrashDetection } from '@/hooks/useCrashDetection';
 import { useVoiceTrigger } from '@/hooks/useVoiceTrigger';
-import { useVoiceFeedback } from '@/hooks/useVoiceFeedback';
-import { useSafetyAudio } from '@/hooks/useSafetyAudio';
 
 const Home = () => {
   const [guardianActive, setGuardianActive] = useState(false);
   const [showCountdown, setShowCountdown] = useState(false);
   const [currentTrigger, setCurrentTrigger] = useState<EmergencyTrigger>('manual');
-
-  const { speak } = useVoiceFeedback();
-  const { startEmergencyRecording } = useSafetyAudio();
 
   const isOnline = useOnlineStatus();
   const { pendingCount, addToQueue } = useOfflineQueue();
@@ -82,11 +77,7 @@ const Home = () => {
     const userId = session?.user?.id || 'anonymous';
     const userName = session?.user?.user_metadata?.full_name || 'A Safety Net User';
 
-    // Trigger AI Voice and Recording
-    speak("Emergency detected. Sharing your location. Stay calm.");
-    // We'll pass the alert ID to the recording hook later
     const alertId = crypto.randomUUID();
-    startEmergencyRecording(alertId);
 
     const event: EmergencyEvent = {
       id: alertId,
