@@ -88,7 +88,7 @@ const Home = () => {
       timestamp: new Date().toISOString(),
       status: 'pending',
       offlineQueued: !isOnline,
-      message: `🆘 [HELP NEEDED] - Safety Net Alert!\n${userName} is in an emergency.\n\n📍 Live Location: ${getGoogleMapsLink() || 'Location unavailable'}\n\n🕒 Time: ${new Date().toLocaleString()}\n\n[Sent via Safety Net Connect]`,
+      message: `🆘 [HELP NEEDED] - Safety Net Alert!\n${userName} is in an emergency.\n\n📍 Live Location: ${getGoogleMapsLink() || 'Location unavailable'}\n\n🕒 Time: ${new Date().toLocaleString()}`,
     };
 
     if (isOnline) {

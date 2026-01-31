@@ -51,10 +51,52 @@ export const useLocation = () => {
     }
   }, []);
 
-  // Get location on mount
+  // Watch location
   useEffect(() => {
-    getCurrentLocation();
-  }, [getCurrentLocation]);
+    let watchId: string | null = null;
+
+    const startWatching = async () => {
+      try {
+        const permission = await Geolocation.checkPermissions();
+        if (permission.location !== 'granted') {
+          await Geolocation.requestPermissions();
+        }
+
+        watchId = await Geolocation.watchPosition(
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+          },
+          (position, err) => {
+            if (err) {
+              console.error('Watch error:', err);
+              return;
+            }
+            if (position) {
+              setLocation({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                accuracy: position.coords.accuracy,
+                loading: false,
+                error: null,
+                lastUpdated: new Date(),
+              });
+            }
+          }
+        );
+      } catch (error: any) {
+        console.error('Error starting location watch:', error);
+      }
+    };
+
+    startWatching();
+
+    return () => {
+      if (watchId) {
+        Geolocation.clearWatch({ id: watchId });
+      }
+    };
+  }, []);
 
   const getGoogleMapsLink = useCallback(() => {
     if (location.latitude && location.longitude) {
