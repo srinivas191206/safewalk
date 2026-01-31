@@ -11,14 +11,19 @@ export default async function handler(
     request: VercelRequest,
     response: VercelResponse
 ) {
-    // enable CORS
+    // CORS Configuration
+    const allowedOrigins = ['http://localhost:8080', 'http://localhost:5173', 'https://safewalk.vercel.app'];
     const origin = request.headers.origin as string;
-    response.setHeader('Access-Control-Allow-Origin', origin || '*');
+
+    if (allowedOrigins.includes(origin) || !origin) {
+        response.setHeader('Access-Control-Allow-Origin', origin || '*');
+    }
+
     response.setHeader('Access-Control-Allow-Credentials', 'true');
     response.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     response.setHeader(
         'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Content-Type'
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
     );
 
     if (request.method === 'OPTIONS') {
