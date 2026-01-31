@@ -48,18 +48,39 @@ export default async function handler(
         const errors: any[] = [];
         const successes: any[] = [];
 
-        // Send SMS to each contact
+        // Send SMS/WhatsApp to each contact
         await Promise.all(
             contacts.map(async (contact: any) => {
                 try {
-                    // Format phone number (ensure it has country code if missing, simplified for demo)
                     const to = contact.phone;
 
+                    // Send standard SMS
                     await client.messages.create({
                         body: `${message}\n\n[Sent via Safety Net Connect]`,
                         from: fromNumber,
                         to: to,
                     });
+
+                    // If WhatsApp enabled, also send via WhatsApp
+                    if (contact.whatsapp_enabled || contact.whatsappEnabled) {
+                        try {
+                            // Note: Twilio WhatsApp from number usually looks like 'whatsapp:+14155238886'
+                            const whatsappFrom = fromNumber.startsWith('whatsapp:')
+                                ? fromNumber
+                                : `whatsapp:${fromNumber}`;
+
+                            await client.messages.create({
+                                body: `${message}\n\n[Sent via Safety Net Connect]`,
+                                from: whatsappFrom,
+                                to: `whatsapp:${to}`,
+                            });
+                            console.log(`WhatsApp sent to ${to}`);
+                        } catch (waError) {
+                            console.error(`WhatsApp failed for ${to}:`, waError);
+                            // We don't fail the whole request if only WhatsApp fails
+                        }
+                    }
+
                     successes.push({ phone: to, status: 'sent' });
                 } catch (error) {
                     console.error(`Failed to send to ${contact.phone}:`, error);
