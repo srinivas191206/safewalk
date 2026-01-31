@@ -4,6 +4,7 @@ import { TextToSpeech } from '@capacitor-community/text-to-speech';
 export const useVoiceFeedback = () => {
     const speak = async (text: string) => {
         try {
+            console.log('AI Voice triggered:', text);
             await TextToSpeech.speak({
                 text,
                 lang: 'en-US',
