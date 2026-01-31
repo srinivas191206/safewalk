@@ -13,6 +13,7 @@ import { useEmergencyContacts } from '@/hooks/useEmergencyContacts';
 import type { EmergencyTrigger, EmergencyEvent } from '@/types/emergency';
 import { toast } from 'sonner';
 import { Users, Radio } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { useCrashDetection } from '@/hooks/useCrashDetection';
@@ -76,20 +77,27 @@ const Home = () => {
   const handleCountdownComplete = useCallback(async () => {
     setShowCountdown(false);
 
+    // Get current user session
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id || 'anonymous';
+    const userName = session?.user?.user_metadata?.full_name || 'A Safety Net User';
+
     // Trigger AI Voice and Recording
     speak("Emergency detected. Sharing your location. Stay calm.");
-    startEmergencyRecording();
+    // We'll pass the alert ID to the recording hook later
+    const alertId = crypto.randomUUID();
+    startEmergencyRecording(alertId);
 
     const event: EmergencyEvent = {
-      id: crypto.randomUUID(),
-      userId: 'local-user',
+      id: alertId,
+      userId: userId,
       trigger: currentTrigger,
       latitude,
       longitude,
       timestamp: new Date().toISOString(),
       status: 'pending',
       offlineQueued: !isOnline,
-      message: `[EMERGENCY ALERT]\nUser may be in danger.\nLocation: ${getGoogleMapsLink() || 'Location unavailable'}\nTime: ${new Date().toLocaleString()}`,
+      message: `🆘 [HELP NEEDED] - Safety Net Alert!\n${userName} is in an emergency.\n\n📍 Live Location: ${getGoogleMapsLink() || 'Location unavailable'}\n\n🕒 Time: ${new Date().toLocaleString()}\n\n[Sent via Safety Net Connect]`,
     };
 
     if (isOnline) {
