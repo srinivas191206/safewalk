@@ -37,7 +37,7 @@ const Home = () => {
     toast.success('Emergency cancelled. Stay safe!');
   }, []);
 
-  const handleCountdownComplete = useCallback(() => {
+  const handleCountdownComplete = useCallback(async () => {
     setShowCountdown(false);
 
     const event: EmergencyEvent = {
@@ -53,14 +53,38 @@ const Home = () => {
     };
 
     if (isOnline) {
-      // In production, this would call the API
-      toast.success('Emergency alert sent to your contacts!');
-      console.log('Sending emergency:', event);
+      // Call Backend API
+      try {
+        const response = await fetch('/api/send-alert', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contacts: contacts,
+            location: { latitude, longitude },
+            message: event.message
+          }),
+        });
+
+        if (response.ok) {
+          toast.success('Emergency alert sent via SMS!');
+          console.log('Backend response success');
+        } else {
+          // If server fails (e.g. no credits), still show "Sent" but warn debug
+          const errorData = await response.json();
+          console.error('Backend failed:', errorData);
+          toast.error(`Alert failed: ${errorData.error || 'Server error'}`);
+        }
+      } catch (error) {
+        console.error('Network error calling backend:', error);
+        toast.error('Network error. Check connection.');
+      }
     } else {
       addToQueue(event);
       toast.warning('No network. Alert queued and will be sent automatically when online.');
     }
-  }, [currentTrigger, latitude, longitude, isOnline, getGoogleMapsLink, addToQueue]);
+  }, [currentTrigger, latitude, longitude, isOnline, getGoogleMapsLink, addToQueue, contacts]);
 
   return (
     <div className="min-h-screen bg-background safe-area-inset pb-24">
