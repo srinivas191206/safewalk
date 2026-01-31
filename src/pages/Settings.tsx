@@ -157,6 +157,7 @@ const Settings = () => {
                 const { error } = await supabase.auth.signOut();
                 if (error) throw error;
                 localStorage.removeItem('guardian_user');
+                localStorage.removeItem('guardian_onboarded');
                 toast.success('Logged out successfully');
                 window.location.href = '/';
               } catch (error: any) {

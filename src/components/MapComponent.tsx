@@ -6,14 +6,11 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
 // Fix for default marker icon in Leaflet + React
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-
-let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41]
+const DefaultIcon = L.divIcon({
+    html: `<div style="background-color: #ef4444; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3);"></div>`,
+    className: 'custom-div-icon',
+    iconSize: [12, 12],
+    iconAnchor: [6, 6],
 });
 
 L.Marker.prototype.options.icon = DefaultIcon;

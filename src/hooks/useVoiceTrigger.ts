@@ -62,6 +62,10 @@ export const useVoiceTrigger = ({ onTrigger, isActive }: VoiceTriggerOptions) =>
 
             if (found) {
                 console.log('Voice Keyword Detected!');
+                toast.warning('Voice Emergency Triggered!', {
+                    description: 'Keep safe, help is being notified.',
+                    duration: 5000,
+                });
                 stopRecognition();
                 onTrigger();
             }

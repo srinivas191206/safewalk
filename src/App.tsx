@@ -27,6 +27,7 @@ const App = () => (
             <Route path="/history" element={<History />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/test" element={<TestMode />} />
+            <Route path="/auth" element={<Index />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
