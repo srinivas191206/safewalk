@@ -12,23 +12,27 @@ export const NavBar = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 safe-area-inset">
-      <div className="bg-card/95 backdrop-blur-xl border-t border-border">
-        <div className="flex items-center justify-around py-2">
+    <nav className="absolute bottom-4 left-4 right-4 z-50">
+      <div className="bg-card/80 backdrop-blur-2xl border border-border/40 rounded-[2rem] shadow-2xl">
+        <div className="flex items-center justify-around py-3 px-2">
           {navItems.map(({ icon: Icon, label, path }) => {
             const isActive = location.pathname === path;
             return (
               <Link
                 key={label}
                 to={path}
-                className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors ${
-                  isActive 
-                    ? 'text-primary' 
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
+                className={`flex flex-col items-center gap-1.5 px-5 py-2 rounded-2xl transition-all duration-300 ${isActive
+                    ? 'text-primary scale-110'
+                    : 'text-muted-foreground hover:text-foreground active:scale-95'
+                  }`}
               >
-                <Icon className="w-6 h-6" />
-                <span className="text-xs font-medium">{label}</span>
+                <Icon className={`w-6 h-6 ${isActive ? 'fill-primary/10' : ''}`} />
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'opacity-100' : 'opacity-70'}`}>
+                  {label}
+                </span>
+                {isActive && (
+                  <div className="w-1.5 h-1.5 bg-primary rounded-full mt-0.5 animate-pulse" />
+                )}
               </Link>
             );
           })}

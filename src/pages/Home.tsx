@@ -145,8 +145,8 @@ const Home = () => {
       </header>
 
       {/* Main content */}
-      <main className="flex flex-col items-center justify-center px-4 py-8">
-        <div className="flex-1 flex flex-col items-center justify-center min-h-[400px] gap-8">
+      <main className="flex-1 flex flex-col px-4 py-8">
+        <div className="flex-1 flex flex-col items-center justify-center min-h-[400px] gap-12">
           <PanicButton
             onTrigger={handlePanicPress}
             disabled={false} // Always allow manual panic
@@ -155,59 +155,57 @@ const Home = () => {
           <div className="flex flex-col gap-3 w-full max-w-xs">
             <button
               onClick={() => setGuardianActive(!guardianActive)}
-              className={`px-6 py-3 rounded-full font-semibold transition-all ${guardianActive
-                ? 'bg-primary text-primary-foreground shadow-lg scale-105 ring-4 ring-primary/20'
+              className={`px-6 py-4 rounded-2xl font-bold text-lg transition-all duration-300 ${guardianActive
+                ? 'bg-primary text-primary-foreground shadow-glow-red scale-105 ring-4 ring-primary/20'
                 : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                 }`}
             >
               {guardianActive ? '🛡️ Guardian Mode ACTIVE' : 'Turn On Guardian Mode'}
             </button>
           </div>
+        </div>
 
-          {/* Live Map */}
-          <div className="w-full max-w-md mt-6 h-48">
-            <MapComponent className="h-full w-full" />
+        {/* Live Map */}
+        <div className="w-full max-w-md mt-6 h-56 rounded-3xl overflow-hidden shadow-card border border-border/50">
+          <MapComponent className="h-full w-full" />
+        </div>
+
+        {/* Sync Status - Premium Card */}
+        <div className="w-full max-w-md mt-8 space-y-3 pb-4">
+          <div className="glass-card rounded-[2rem] p-5">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-accent/20 flex items-center justify-center">
+                <Users className="w-6 h-6 text-accent" />
+              </div>
+              <div className="flex-1">
+                <p className="text-base font-bold text-foreground">
+                  Contacts Synced
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {contacts.length} emergency contact{contacts.length !== 1 ? 's' : ''} ready
+                </p>
+              </div>
+              <div className="px-3 py-1 bg-accent/10 border border-accent/20 rounded-full">
+                <span className="text-xs font-bold text-accent">SECURE</span>
+              </div>
+            </div>
           </div>
 
-          {/* Features at the down */}
-          <div className="w-full max-w-md mt-8">
-            <QuickActions />
-          </div>
-
-          {/* Info/Status Cards */}
-          <div className="w-full max-w-md mt-6 space-y-3 pb-8">
-            <div className="glass-card rounded-2xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-accent" />
+          {!isOnline && (
+            <div className="glass-card rounded-[2rem] p-5 border-warning/30">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-warning/20 flex items-center justify-center">
+                  <Radio className="w-6 h-6 text-warning" />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {contacts.length} emergency contact{contacts.length !== 1 ? 's' : ''} configured
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {hasMinimumContacts ? 'Ready to alert' : 'Add at least 2 contacts'}
+                <div className="flex-1">
+                  <p className="text-base font-bold text-foreground">Offline Mode</p>
+                  <p className="text-sm text-muted-foreground">
+                    Alerts will be sent when online
                   </p>
                 </div>
               </div>
             </div>
-
-            {!isOnline && (
-              <div className="glass-card rounded-2xl p-4 border-warning/30">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center">
-                    <Radio className="w-5 h-5 text-warning" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Offline Mode Active</p>
-                    <p className="text-xs text-muted-foreground">
-                      Alerts will be queued and sent when online
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </main>
 
