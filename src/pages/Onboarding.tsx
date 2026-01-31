@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { Geolocation } from '@capacitor/geolocation';
+import { SpeechRecognition } from '@capacitor-community/speech-recognition';
+import { VoiceRecorder } from 'capacitor-voice-recorder';
 
 type Step = 'welcome' | 'phone' | 'permissions' | 'complete';
 
@@ -71,17 +74,40 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
   };
 
   const handleRequestPermissions = async () => {
-    // Request location
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(() => { }, () => { });
-    }
+    try {
+      // 1. Request Location
+      const locPerm = await Geolocation.requestPermissions();
+      console.log('Location permission:', locPerm);
 
-    // Request notifications
-    if ('Notification' in window) {
-      await Notification.requestPermission();
-    }
+      // 2. Request Microphone (via VoiceRecorder)
+      const micPerm = await VoiceRecorder.requestAudioRecordingPermission();
+      console.log('Mic permission:', micPerm);
 
-    setStep('complete');
+      // 3. Request Speech Recognition
+      const speechPerm = await SpeechRecognition.requestPermissions();
+      console.log('Speech permission:', speechPerm);
+
+      // 4. Request SMS (via SmsSender)
+      try {
+        const { SmsSender } = await import('capacitor-sms-sender');
+        const smsPerm = await SmsSender.requestPermissions();
+        console.log('SMS permission:', smsPerm);
+      } catch (e) {
+        console.warn('SMS plugin permission request failed (maybe not on Android):', e);
+      }
+
+      // 5. Request Notifications
+      if ('Notification' in window) {
+        await Notification.requestPermission();
+      }
+
+      toast.success('All permissions configured');
+      setStep('complete');
+    } catch (error) {
+      console.error('Permission error:', error);
+      toast.error('Failed to request some permissions. Please enable them in settings.');
+      setStep('complete'); // Still allow moving forward but warn
+    }
   };
 
   const handleComplete = () => {
@@ -97,8 +123,9 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
 
   const permissions = [
     { icon: MapPin, label: 'Location', description: 'To share your location during emergencies' },
-    { icon: Mic, label: 'Microphone', description: 'For voice-activated emergency triggers' },
+    { icon: Mic, label: 'Microphone & Speech', description: 'For voice-activated emergency triggers' },
     { icon: Bell, label: 'Notifications', description: 'To alert you about emergency status' },
+    { icon: Phone, label: 'Direct SMS', description: 'To send automatic alerts to your contacts' },
   ];
 
   return (

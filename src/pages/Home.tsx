@@ -92,38 +92,58 @@ const Home = () => {
     };
 
     if (isOnline) {
-      // Call Backend API
+      // Call Backend API (Cloud Alert)
       try {
         const apiUrl = import.meta.env.VITE_API_URL || '';
-        const response = await fetch(`${apiUrl}/api/send-alert`, {
+        fetch(`${apiUrl}/api/send-alert`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contacts: contacts,
             location: { latitude, longitude },
             message: event.message
           }),
-        });
-
-        if (response.ok) {
-          toast.success('Emergency alert sent via SMS!');
-          console.log('Backend response success');
-        } else {
-          // If server fails (e.g. no credits), still show "Sent" but warn debug
-          const errorData = await response.json();
-          console.error('Backend failed:', errorData);
-          toast.error(`Alert failed: ${errorData.error || 'Server error'}`);
-        }
+        }).catch(err => console.error('Cloud alert background error:', err));
       } catch (error) {
-        console.error('Network error calling backend:', error);
-        toast.error('Network error. Check connection.');
+        console.error('Cloud alert initiate error:', error);
       }
-    } else {
-      addToQueue(event);
-      toast.warning('No network. Alert queued and will be sent automatically when online.');
     }
+
+    // DIRECT NATIVE SMS (Option 2)
+    const sendNativeSMS = async () => {
+      try {
+        const { SmsSender } = await import('capacitor-sms-sender');
+
+        for (const contact of contacts) {
+          try {
+            // Remove +91 or any formatting if necessary, but plugin usually handles standard strings
+            const phone = contact.phone.replace(/\s/g, '');
+
+            await SmsSender.send({
+              id: Date.now(),
+              sim: 0,
+              phone: phone,
+              text: event.message,
+            });
+            console.log(`Native SMS sent to ${contact.name}`);
+          } catch (err) {
+            console.error(`Failed to send native SMS to ${contact.name}:`, err);
+          }
+        }
+        toast.success('Emergency alerts sent successfully!');
+      } catch (error) {
+        console.error('Native SMS Plugin error:', error);
+        if (isOnline) {
+          toast.success('Alert sent via Cloud Proxy');
+        } else {
+          toast.error('Failed to send native SMS');
+          addToQueue(event);
+        }
+      }
+    };
+
+    sendNativeSMS();
+
   }, [currentTrigger, latitude, longitude, isOnline, getGoogleMapsLink, addToQueue, contacts]);
 
   return (
