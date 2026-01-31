@@ -10,6 +10,8 @@ import Settings from "./pages/Settings";
 import TestMode from "./pages/TestMode";
 import NotFound from "./pages/NotFound";
 
+import { MobilePreview } from "./components/MobilePreview";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -17,16 +19,18 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/contacts" element={<Contacts />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/test" element={<TestMode />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <MobilePreview>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/contacts" element={<Contacts />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/test" element={<TestMode />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </MobilePreview>
     </TooltipProvider>
   </QueryClientProvider>
 );
