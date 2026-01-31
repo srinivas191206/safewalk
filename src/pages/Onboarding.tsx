@@ -11,6 +11,8 @@ interface OnboardingProps {
   onComplete: () => void;
 }
 
+import { supabase } from '@/lib/supabase';
+
 const Onboarding = ({ onComplete }: OnboardingProps) => {
   const [step, setStep] = useState<Step>('welcome');
   const [phone, setPhone] = useState('');
@@ -18,33 +20,60 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
   const [showOtp, setShowOtp] = useState(false);
   const [name, setName] = useState('');
 
-  const handleSendOtp = () => {
+  const handleSendOtp = async () => {
     if (!phone || phone.length < 10) {
       toast.error('Please enter a valid phone number');
       return;
     }
-    setShowOtp(true);
-    toast.success('OTP sent to your phone (demo)');
+
+    // Format number to E.164
+    const formattedPhone = `+91${phone}`;
+
+    const { error } = await supabase.auth.signInWithOtp({
+      phone: formattedPhone,
+    });
+
+    if (error) {
+      console.error(error);
+      toast.error('Failed to send OTP: ' + error.message);
+    } else {
+      setShowOtp(true);
+      toast.success('OTP sent to your phone');
+    }
   };
 
-  const handleVerifyOtp = () => {
-    if (!otp || otp.length < 4) {
-      toast.error('Please enter the OTP');
+  const handleVerifyOtp = async () => {
+    if (!otp || otp.length < 6) {
+      toast.error('Please enter the 6-digit OTP');
       return;
     }
     if (!name) {
       toast.error('Please enter your name');
       return;
     }
-    // Save to localStorage for demo
-    localStorage.setItem('guardian_user', JSON.stringify({ phone, name }));
-    setStep('permissions');
+
+    const formattedPhone = `+91${phone}`;
+
+    const { data, error } = await supabase.auth.verifyOtp({
+      phone: formattedPhone,
+      token: otp,
+      type: 'sms',
+    });
+
+    if (error) {
+      toast.error('Invalid OTP: ' + error.message);
+    } else {
+      // Save extra user details (optional, better in a profiles table)
+      localStorage.setItem('guardian_user', JSON.stringify({ phone: formattedPhone, name, id: data.user?.id }));
+      setStep('permissions');
+      toast.success('Verified successfully');
+    }
   };
 
   const handleRequestPermissions = async () => {
     // Request location
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(() => {}, () => {});
+      navigator.geolocation.getCurrentPosition(() => { }, () => { });
     }
 
     // Request notifications
@@ -80,7 +109,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
           <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center mb-6">
             <Shield className="w-12 h-12 text-primary" />
           </div>
-          
+
           <h1 className="text-3xl font-bold text-foreground mb-2">Guardian Mode</h1>
           <p className="text-muted-foreground mb-8">Your personal safety companion</p>
 
@@ -213,7 +242,7 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
           <div className="w-24 h-24 rounded-full bg-accent/20 flex items-center justify-center mb-6">
             <Shield className="w-12 h-12 text-accent" />
           </div>
-          
+
           <h1 className="text-3xl font-bold text-foreground mb-2">You're Protected!</h1>
           <p className="text-muted-foreground mb-4">Welcome, {name}</p>
           <p className="text-sm text-muted-foreground mb-8 max-w-xs">

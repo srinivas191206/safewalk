@@ -20,7 +20,7 @@ const Contacts = () => {
     whatsappEnabled: true,
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name || !formData.phone || !formData.relationship) {
@@ -28,15 +28,15 @@ const Contacts = () => {
       return;
     }
 
-    addContact(formData);
+    await addContact(formData);
     setFormData({ name: '', phone: '', relationship: '', whatsappEnabled: true });
     setShowForm(false);
-    toast.success('Contact added successfully');
+    // Hook already toasts success
   };
 
-  const handleDelete = (id: string) => {
-    deleteContact(id);
-    toast.success('Contact removed');
+  const handleDelete = async (id: string) => {
+    await deleteContact(id);
+    // Hook already toasts success
   };
 
   return (
