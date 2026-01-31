@@ -3,7 +3,6 @@ import { PanicButton } from '@/components/PanicButton';
 import { StatusBar } from '@/components/StatusBar';
 import { CountdownModal } from '@/components/CountdownModal';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
-import { QuickActions } from '@/components/QuickActions';
 import { NavBar } from '@/components/NavBar';
 import MapComponent from '@/components/MapComponent';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
@@ -12,7 +11,6 @@ import { useLocation } from '@/hooks/useLocation';
 import { useEmergencyContacts } from '@/hooks/useEmergencyContacts';
 import type { EmergencyTrigger, EmergencyEvent } from '@/types/emergency';
 import { toast } from 'sonner';
-import { Users, Radio } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 import { KeepAwake } from '@capacitor-community/keep-awake';
@@ -162,59 +160,12 @@ const Home = () => {
             >
               {guardianActive ? '🛡️ Guardian Mode ACTIVE' : 'Turn On Guardian Mode'}
             </button>
-
-            <button
-              onClick={() => handleTrigger('accident')}
-              className="px-6 py-3 rounded-full font-semibold bg-orange-100 text-orange-600 hover:bg-orange-200 transition-all border border-orange-200"
-            >
-              🚗 Simulate Crash (Demo)
-            </button>
-          </div>
-        </div>
-
-        {/* Quick actions */}
-        <div className="w-full max-w-md mt-8">
-          <QuickActions />
-        </div>
-
-        {/* Live Map */}
-        <div className="w-full max-w-md mt-6 h-48">
-          <MapComponent className="h-full w-full" />
-        </div>
-
-        {/* Info cards */}
-        <div className="w-full max-w-md mt-6 space-y-3">
-          <div className="glass-card rounded-2xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-                <Users className="w-5 h-5 text-accent" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">
-                  {contacts.length} emergency contact{contacts.length !== 1 ? 's' : ''} configured
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {hasMinimumContacts ? 'Ready to alert' : 'Add at least 2 contacts'}
-                </p>
-              </div>
-            </div>
           </div>
 
-          {!isOnline && (
-            <div className="glass-card rounded-2xl p-4 border-warning/30">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center">
-                  <Radio className="w-5 h-5 text-warning" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">Offline Mode Active</p>
-                  <p className="text-xs text-muted-foreground">
-                    Alerts will be queued and sent when online
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Live Map */}
+          <div className="w-full max-w-md mt-6 h-48">
+            <MapComponent className="h-full w-full" />
+          </div>
         </div>
       </main>
 
