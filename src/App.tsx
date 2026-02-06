@@ -5,11 +5,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Contacts from "./pages/Contacts";
+import ContactSelector from "./pages/ContactSelector";
 import History from "./pages/History";
+import About from "./pages/About";
 import Settings from "./pages/Settings";
 import TestMode from "./pages/TestMode";
 import NotFound from "./pages/NotFound";
 
+import MainLayout from "./layouts/MainLayout";
 import { MobilePreview } from "./components/MobilePreview";
 
 const queryClient = new QueryClient();
@@ -21,15 +24,19 @@ const App = () => (
       <Sonner />
       <MobilePreview>
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/contacts" element={<Contacts />} />
-            <Route path="/history" element={<History />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/test" element={<TestMode />} />
-            <Route path="/auth" element={<Index />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <MainLayout>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/contacts" element={<Contacts />} />
+              <Route path="/contacts/select" element={<ContactSelector />} />
+              <Route path="/history" element={<History />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/test" element={<TestMode />} />
+              <Route path="/auth" element={<Index />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </MainLayout>
         </BrowserRouter>
       </MobilePreview>
     </TooltipProvider>

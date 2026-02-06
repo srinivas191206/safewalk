@@ -3,6 +3,16 @@ import Twilio from 'twilio';
 
 // Initialize Twilio client
 // NOTE: These must be set in your Vercel Environment Variables
+// WhatsApp Automation Gateways
+// Option 1: Self-Hosted (WAHA, Wauapi, etc.) - FREE if you host it
+const waApiUrl = process.env.WHATSAPP_API_URL;
+const waApiKey = process.env.WHATSAPP_API_KEY;
+
+// Option 2: UltraMsg (Paid, but very reliable/easy)
+const waGatewayToken = process.env.WHATSAPP_GATEWAY_TOKEN;
+const waGatewayInstance = process.env.WHATSAPP_GATEWAY_INSTANCE;
+
+// Twilio Config (For SMS and Fallback WhatsApp)
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const fromNumber = process.env.TWILIO_PHONE_NUMBER;
@@ -62,23 +72,53 @@ export default async function handler(
                         to: to,
                     });
 
-                    // If WhatsApp enabled, also send via WhatsApp
+                    // Automated WhatsApp Logic
                     if (contact.whatsapp_enabled || contact.whatsappEnabled) {
                         try {
-                            // Note: Twilio WhatsApp from number usually looks like 'whatsapp:+14155238886'
-                            const whatsappFrom = fromNumber.startsWith('whatsapp:')
-                                ? fromNumber
-                                : `whatsapp:${fromNumber}`;
+                            if (waApiUrl) {
+                                // Priority A: Self-Hosted Waqapi/WAHA (Free)
+                                await fetch(`${waApiUrl}/sendText`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        // Some APIs use X-Api-Key, others use Authorization
+                                        'X-Api-Key': waApiKey || '',
+                                        'Authorization': `Bearer ${waApiKey}`
+                                    },
+                                    body: JSON.stringify({
+                                        chatId: `${to.replace('+', '')}@c.us`,
+                                        text: `${message}\n\n[Sent via Safety Net Automated Gateway]`,
+                                        session: 'safewalk' // Matches setup-whatsapp-bot.sh
+                                    }),
+                                });
+                                console.log(`Self-hosted WhatsApp sent to ${to}`);
+                            } else if (waGatewayToken && waGatewayInstance) {
+                                // Priority B: UltraMsg (Paid Gateway)
+                                await fetch(`https://api.ultramsg.com/${waGatewayInstance}/messages/chat`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                    body: new URLSearchParams({
+                                        token: waGatewayToken,
+                                        to: to.replace('+', ''),
+                                        body: `${message}\n\n[Sent via Safety Net Automated Gateway]`,
+                                    }),
+                                });
+                                console.log(`UltraMsg WhatsApp sent to ${to}`);
+                            } else {
+                                // Priority C: Twilio WhatsApp (Requires Sandbox join)
+                                const whatsappFrom = fromNumber.startsWith('whatsapp:')
+                                    ? fromNumber
+                                    : `whatsapp:${fromNumber}`;
 
-                            await client.messages.create({
-                                body: `${message}\n\n[Sent via Safety Net Connect]`,
-                                from: whatsappFrom,
-                                to: `whatsapp:${to}`,
-                            });
-                            console.log(`WhatsApp sent to ${to}`);
+                                await client.messages.create({
+                                    body: `${message}\n\n[Sent via Safety Net Connect]`,
+                                    from: whatsappFrom,
+                                    to: `whatsapp:${to}`,
+                                });
+                                console.log(`Twilio WhatsApp sent to ${to}`);
+                            }
                         } catch (waError) {
-                            console.error(`WhatsApp failed for ${to}:`, waError);
-                            // We don't fail the whole request if only WhatsApp fails
+                            console.error(`WhatsApp automation failed for ${to}:`, waError);
                         }
                     }
 

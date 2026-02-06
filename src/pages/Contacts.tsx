@@ -1,23 +1,24 @@
 import { useState } from 'react';
-import { ArrowLeft, Plus, UserPlus, AlertTriangle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowLeft, Plus, UserPlus, AlertTriangle, Contact as LucideContact, Users } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { EmergencyContactCard } from '@/components/EmergencyContactCard';
-import { NavBar } from '@/components/NavBar';
 import { useEmergencyContacts } from '@/hooks/useEmergencyContacts';
 import { toast } from 'sonner';
 
+
 const Contacts = () => {
+  const navigate = useNavigate();
   const { contacts, addContact, deleteContact, hasMinimumContacts } = useEmergencyContacts();
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     relationship: '',
-    whatsappEnabled: true,
+
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,7 +41,7 @@ const Contacts = () => {
     };
 
     await addContact(contactToAdd);
-    setFormData({ name: '', phone: '', relationship: '', whatsappEnabled: true });
+    setFormData({ name: '', phone: '', relationship: '' });
     setShowForm(false);
     // Hook already toasts success
   };
@@ -50,60 +51,76 @@ const Contacts = () => {
     // Hook already toasts success
   };
 
+  const handlePickContact = () => {
+    navigate('/contacts/select');
+  };
+
   return (
-    <div className="min-h-screen bg-background safe-area-inset pb-24">
+    <div className="flex flex-col bg-background min-h-full">
       {/* Header */}
-      <header className="px-4 pt-4 pb-6">
-        <div className="flex items-center gap-4 mb-2">
-          <Link to="/" className="p-2 -ml-2 rounded-xl hover:bg-secondary">
+      <header className="px-5 pt-6 pb-4 border-b border-border/10 bg-background/60 backdrop-blur-xl sticky top-0 z-50">
+        <div className="flex items-center gap-4">
+          <Link to="/" className="p-2 -ml-2 rounded-xl hover:bg-secondary/50 transition-colors">
             <ArrowLeft className="w-6 h-6" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Emergency Contacts</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-xl font-black text-foreground tracking-tight">Safe Nodes</h1>
+            <p className="text-[9px] text-muted-foreground font-extrabold uppercase tracking-widest">
               {hasMinimumContacts
-                ? `${contacts.length} contacts configured`
-                : 'Add at least 2 contacts'}
+                ? `${contacts.length} SECURE CONNECTIONS`
+                : `ADD ${2 - contacts.length} MORE FOR SYSTEM OPS`}
             </p>
           </div>
         </div>
       </header>
 
-      <main className="px-4 space-y-4">
+      <main className="overflow-y-auto px-4 py-6 space-y-6">
         {/* Add button or form */}
         {showForm ? (
-          <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-6 space-y-4">
+          <form onSubmit={handleSubmit} className="glass-card rounded-[2.5rem] p-6 space-y-5 border-2 border-primary/10 shadow-premium">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-semibold text-foreground">Add New Contact</h3>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowForm(false)}
-              >
-                Cancel
-              </Button>
+              <h3 className="font-black text-foreground uppercase tracking-tight">Initialize New Node</h3>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePickContact}
+                  className="rounded-full font-bold h-8 text-[10px]"
+                >
+                  <LucideContact className="w-3 h-3 mr-1" /> Pick
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowForm(false)}
+                  className="rounded-full font-bold"
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
 
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="name">Name</Label>
+              <div className="space-y-2">
+                <Label className="font-black text-[10px] uppercase tracking-widest ml-1">Codename / Full Name</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Contact name"
-                  className="mt-1"
+                  placeholder="e.g. Sentinel One"
+                  className="rounded-2xl bg-muted/30 border-none h-12"
                 />
               </div>
 
-              <div>
-                <Label htmlFor="phone">Phone Number</Label>
-                <div className="flex gap-2 mt-1">
+              <div className="space-y-2">
+                <Label className="font-black text-[10px] uppercase tracking-widest ml-1">Universal Phone ID</Label>
+                <div className="flex gap-2">
                   <Input
                     value="+91"
                     disabled
-                    className="w-16 text-center"
+                    className="w-16 text-center rounded-2xl bg-muted/50 border-none font-bold"
                   />
                   <Input
                     id="phone"
@@ -111,57 +128,54 @@ const Contacts = () => {
                     value={formData.phone}
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                     placeholder="98765 43210"
-                    className="flex-1"
+                    className="flex-1 rounded-2xl bg-muted/30 border-none h-12 font-bold"
                     maxLength={10}
                   />
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="relationship">Relationship</Label>
+              <div className="space-y-2">
+                <Label className="font-black text-[10px] uppercase tracking-widest ml-1">Node Relationship</Label>
                 <Input
                   id="relationship"
                   value={formData.relationship}
                   onChange={(e) => setFormData(prev => ({ ...prev, relationship: e.target.value }))}
-                  placeholder="e.g., Parent, Spouse, Friend"
-                  className="mt-1"
+                  placeholder="e.g. Primary Support"
+                  className="rounded-2xl bg-muted/30 border-none h-12"
                 />
               </div>
 
-              <div className="flex items-center justify-between py-2">
-                <div>
-                  <Label htmlFor="whatsapp">Enable WhatsApp Alerts</Label>
-                  <p className="text-xs text-muted-foreground">Send alerts via WhatsApp too</p>
-                </div>
-                <Switch
-                  id="whatsapp"
-                  checked={formData.whatsappEnabled}
-                  onCheckedChange={(checked) =>
-                    setFormData(prev => ({ ...prev, whatsappEnabled: checked }))
-                  }
-                />
-              </div>
+
             </div>
 
-            <Button type="submit" className="w-full">
-              <UserPlus className="w-4 h-4 mr-2" />
-              Add Contact
+            <Button type="submit" className="w-full h-14 rounded-[1.5rem] font-black uppercase tracking-widest bg-primary hover:bg-primary/90 shadow-glow-red">
+              <UserPlus className="w-5 h-5 mr-2" />
+              Activate Node
             </Button>
           </form>
         ) : (
-          <Button
-            onClick={() => setShowForm(true)}
-            className="w-full h-14 text-base"
-            variant="outline"
-            style={{ borderRadius: 'var(--radius)' }}
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Add Emergency Contact
-          </Button>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={() => setShowForm(true)}
+                className="col-span-1 h-16 text-sm font-black uppercase tracking-widest rounded-[2rem] border-2 border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 text-primary transition-all shadow-sm"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Manual Add
+              </Button>
+              <Button
+                onClick={handlePickContact}
+                className="col-span-1 h-16 text-sm font-black uppercase tracking-widest rounded-[2rem] bg-secondary/80 hover:bg-secondary text-secondary-foreground transition-all shadow-sm border border-secondary"
+              >
+                <LucideContact className="w-5 h-5 mr-2" />
+                From Phone
+              </Button>
+            </div>
+          </div>
         )}
 
         {/* Contacts list */}
-        <div className="space-y-3">
+        <div className="space-y-4 pb-12">
           {contacts.map((contact) => (
             <EmergencyContactCard
               key={contact.id}
@@ -172,29 +186,17 @@ const Contacts = () => {
         </div>
 
         {contacts.length === 0 && !showForm && (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 rounded-full bg-secondary mx-auto mb-4 flex items-center justify-center">
+          <div className="text-center py-16 px-8">
+            <div className="w-20 h-20 rounded-[2rem] bg-muted flex items-center justify-center mx-auto mb-6 shadow-premium">
               <UserPlus className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="font-medium text-foreground mb-1">No contacts yet</h3>
-            <p className="text-sm text-muted-foreground">
-              Add at least 2 emergency contacts to use Guardian Mode
-            </p>
-          </div>
-        )}
-
-        {/* Minimum contacts warning */}
-        {contacts.length > 0 && !hasMinimumContacts && (
-          <div className="glass-card rounded-2xl p-4 border-warning/30">
-            <p className="text-sm text-warning text-center flex items-center justify-center gap-2">
-              <AlertTriangle className="w-4 h-4" />
-              <span>Add {2 - contacts.length} more contact{2 - contacts.length > 1 ? 's' : ''} to activate Guardian Mode</span>
+            <h3 className="text-lg font-black text-foreground mb-2 italic">No Guardian Nodes Detected</h3>
+            <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider leading-relaxed">
+              Minimum of 2 active Guardian Nodes required for Guardian Mode activation.
             </p>
           </div>
         )}
       </main>
-
-      <NavBar />
     </div>
   );
 };

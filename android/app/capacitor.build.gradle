@@ -9,12 +9,18 @@ android {
 
 apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
+    implementation project(':capacitor-community-contacts')
     implementation project(':capacitor-community-keep-awake')
     implementation project(':capacitor-community-speech-recognition')
     implementation project(':capacitor-community-text-to-speech')
+    implementation project(':capacitor-app')
+    implementation project(':capacitor-device')
     implementation project(':capacitor-filesystem')
     implementation project(':capacitor-geolocation')
-    implementation project(':capacitor-sms-sender')
+    implementation project(':capacitor-haptics')
+    implementation project(':capacitor-local-notifications')
+    implementation project(':capacitor-network')
+    implementation project(':kevinmarques-capacitor-barometer')
     implementation project(':capacitor-voice-recorder')
 
 }

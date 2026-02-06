@@ -26,7 +26,7 @@ export const useEmergencyContacts = () => {
         name: c.name,
         phone: c.phone,
         relationship: c.relationship,
-        whatsappEnabled: c.whatsapp_enabled
+
       }));
 
       setContacts(mappedContacts);
@@ -57,7 +57,7 @@ export const useEmergencyContacts = () => {
           name: contact.name,
           phone: contact.phone,
           relationship: contact.relationship,
-          whatsapp_enabled: contact.whatsappEnabled
+
         })
         .select()
         .single();
@@ -69,7 +69,7 @@ export const useEmergencyContacts = () => {
         name: data.name,
         phone: data.phone,
         relationship: data.relationship,
-        whatsappEnabled: data.whatsapp_enabled
+
       };
 
       setContacts(prev => [...prev, newContact]);
@@ -91,7 +91,7 @@ export const useEmergencyContacts = () => {
       if (updates.name) dbUpdates.name = updates.name;
       if (updates.phone) dbUpdates.phone = updates.phone;
       if (updates.relationship) dbUpdates.relationship = updates.relationship;
-      if (updates.whatsappEnabled !== undefined) dbUpdates.whatsapp_enabled = updates.whatsappEnabled;
+
 
       const { error } = await supabase
         .from('contacts')

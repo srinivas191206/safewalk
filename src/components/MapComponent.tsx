@@ -6,13 +6,13 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
 // Fix for default marker icon in Leaflet + React
+// Use a more robust icon definition
 const DefaultIcon = L.divIcon({
-    html: `<div style="background-color: #ef4444; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3);"></div>`,
-    className: 'custom-div-icon',
-    iconSize: [12, 12],
-    iconAnchor: [6, 6],
+    html: `<div class="w-4 h-4 bg-primary rounded-full border-2 border-white shadow-lg pulse-ring"></div>`,
+    className: '',
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
 });
-
 L.Marker.prototype.options.icon = DefaultIcon;
 
 interface MapComponentProps {
@@ -71,7 +71,7 @@ const MapComponent = ({ className }: MapComponentProps) => {
     }
 
     return (
-        <div className={`rounded-2xl overflow-hidden border border-border shadow-sm ${className}`}>
+        <div className={`w-full h-full relative ${className}`}>
             <MapContainer
                 center={position}
                 zoom={15}

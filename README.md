@@ -1,73 +1,81 @@
-# Welcome to your Lovable project
+# Safe Walk (Safety Net Connect)
 
-## Project info
+## Project Overview
+**Safe Walk** is a personal safety application designed to provide immediate assistance in emergencies. It features a robust **"Guardian Mode"** that monitors for accidents or voice triggers, and a manual **SOS Panic Button**. When triggered, the app captures the user's location, records a 10-second audio clip, and sends emergency alerts via SMS and WhatsApp to trusted contacts.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Key Features
 
-## How can I edit this code?
+- **Guardian Mode**: "ARMS" the system to prevent screen sleep, show persistent status notifications, and actively listen for crash/fall detection or voice commands.
+- **SOS Panic Button**: Large, accessible button to immediately trigger an emergency alert.
+- **Live Location Tracking**: Captures precise latitude/longitude and generates a Google Maps link.
+- **Evidence Recording**: Automatically records 10 seconds of audio when an alert is triggered.
+- **Offline Support**: Queues alerts if the device is offline and sends them once connectivity is restored.
+- **Multi-Channel Alerts**:
+    - **Direct SMS**: Uses the device's SIM card to send immediate text messages.
+    - **WhatsApp**: Fallback/secondary alert via WhatsApp.
+- **Crash Detection**: Uses device sensors (accelerometer) to detect sudden impacts (when Guardian Mode is active).
+- **Voice Trigger**: Activates SOS via voice command (when Guardian Mode is active).
 
-There are several ways of editing your application.
+## "What is What" - Project Structure
 
-**Use Lovable**
+Here is a breakdown of the key files and directories to help you navigate the codebase:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### Root Directory
+- **`/android` & `/ios`**: Native project files for building mobile apps with Capacitor.
+- **`capacitor.config.ts`**: Configuration for Capacitor (app ID, plugins, etc.).
+- **`package.json`**: Lists dependencies (React, Capacitor plugins, etc.) and scripts.
 
-Changes made via Lovable will be committed automatically to this repo.
+### Source Code (`/src`)
 
-**Use your preferred IDE**
+#### **Pages (`/src/pages`)**
+- **`Home.tsx`**: The main dashboard. Contains the logic for Guardian Mode, the Panic Button, and orchestrating the alert flow (SMS, Audio, Location).
+- **`Contacts.tsx`**: Interface for adding and managing trusted emergency contacts.
+- **`History.tsx`**: Displays a log of past SOS events and alerts.
+- **`Settings.tsx`**: Application settings.
+- **`Onboarding.tsx`**: Initial setup flow for new users.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+#### **Components (`/src/components`)**
+- **`PanicButton.tsx`**: The UI for the central SOS button with pulse animations.
+- **`CountdownModal.tsx`**: The "Cancel" timer that appears before an alert is actually sent (preventing false alarms).
+- **`MapComponent.tsx`**: Renders the map view using Leaflet.
+- **`EmergencyHelplines.tsx`**: Quick access to standard emergency numbers (Police, Ambulance).
+- **`OfflineIndicator.tsx`**: Shows a warning when internet connectivity is lost.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+#### **Logic & Helpers**
+- **`/src/hooks`**: Custom React hooks for specific functionality:
+    - `useLocation.ts`: Manages GPS coordinates.
+    - `useEmergencyContacts.ts`: CRUD operations for contacts.
+    - `useCrashDetection.ts` & `useVoiceTrigger.ts`: Sensor logic for Guardian Mode.
+    - `useOfflineQueue.ts`: Manages unsent alerts when offline.
+- **`/src/lib/supabase.ts`**: Client for the Supabase backend (likely used for auth/sync).
+- **`/src/types/emergency.ts`**: TypeScript definitions for Alert objects and Triggers.
 
-Follow these steps:
+## Technologies Used
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- **Frontend**: React, TypeScript, Vite
+- **UI Framework**: Tailwind CSS, shadcn/ui
+- **Mobile Runtime**: Capacitor (allows running this web app as a native iOS/Android app)
+- **Maps**: Leaflet / React-Leaflet
+- **Backend/Data**: Supabase
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## Setup & Development
 
-# Step 3: Install the necessary dependencies.
-npm i
+1.  **Install Dependencies**:
+    ```bash
+    npm install
+    ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+2.  **Start Development Server**:
+    ```bash
+    npm run dev
+    ```
 
-**Edit a file directly in GitHub**
+3.  **Build for Production**:
+    ```bash
+    npm run build
+    ```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+4.  **Sync with Mobile Native Projects**:
+    ```bash
+    npx cap sync
+    ```

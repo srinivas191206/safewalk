@@ -20,7 +20,7 @@ export const MobilePreview: React.FC<MobilePreviewProps> = ({ children }) => {
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-1.5 bg-slate-800 rounded-full"></div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto w-full h-full custom-scrollbar pb-32">
+                <div className="flex-1 overflow-y-auto w-full h-full custom-scrollbar">
                     {children}
                 </div>
 

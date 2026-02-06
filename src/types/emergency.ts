@@ -3,7 +3,6 @@ export interface EmergencyContact {
   name: string;
   phone: string;
   relationship: string;
-  whatsappEnabled: boolean;
 }
 
 export interface UserProfile {
@@ -16,6 +15,13 @@ export interface UserProfile {
 
 export type EmergencyTrigger = 'accident' | 'voice' | 'manual';
 
+export interface LogEntry {
+  timestamp: string;
+  latitude: number | null;
+  longitude: number | null;
+  event: string;
+}
+
 export interface EmergencyEvent {
   id: string;
   userId: string;
@@ -26,6 +32,8 @@ export interface EmergencyEvent {
   status: 'pending' | 'sent' | 'failed' | 'cancelled';
   offlineQueued: boolean;
   message: string;
+  recordingPath?: string;
+  logEntries?: LogEntry[];
 }
 
 export interface AppPermissions {

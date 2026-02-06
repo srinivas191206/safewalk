@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { ArrowLeft, TestTube, CheckCircle, AlertTriangle, Mic, Smartphone, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { NavBar } from '@/components/NavBar';
 import { PanicButton } from '@/components/PanicButton';
 import { CountdownModal } from '@/components/CountdownModal';
 import { useLocation } from '@/hooks/useLocation';
@@ -15,7 +14,7 @@ const TestMode = () => {
     sensors: null,
     notifications: null,
   });
-  
+
   const { hasLocation, getCurrentLocation, latitude, longitude } = useLocation();
 
   const runLocationTest = () => {
@@ -87,16 +86,16 @@ const TestMode = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background safe-area-inset pb-24">
+    <div className="flex flex-col bg-background min-h-full">
       {/* Header */}
-      <header className="px-4 pt-4 pb-6">
-        <div className="flex items-center gap-4 mb-2">
-          <Link to="/" className="p-2 -ml-2 rounded-xl hover:bg-secondary">
+      <header className="px-5 pt-6 pb-4 border-b border-border/10 bg-background/60 backdrop-blur-xl sticky top-0 z-50">
+        <div className="flex items-center gap-4">
+          <Link to="/" className="p-2 -ml-2 rounded-xl hover:bg-secondary/50 transition-colors">
             <ArrowLeft className="w-6 h-6" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Test Mode</h1>
-            <p className="text-sm text-muted-foreground">Demo without real alerts</p>
+            <h1 className="text-xl font-black text-foreground tracking-tight">Diagnostic Mode</h1>
+            <p className="text-[9px] text-muted-foreground font-extrabold uppercase tracking-widest">Protocol Verification</p>
           </div>
         </div>
       </header>
@@ -192,7 +191,6 @@ const TestMode = () => {
         triggerType="manual"
       />
 
-      <NavBar />
     </div>
   );
 };

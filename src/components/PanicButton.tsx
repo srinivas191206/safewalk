@@ -50,9 +50,9 @@ export const PanicButton = ({ onTrigger, disabled, isTestMode }: PanicButtonProp
       </button>
 
       {/* Helper text */}
-      <div className="absolute -bottom-16 left-0 right-0 text-center">
-        <p className="text-muted-foreground text-sm">
-          Tap to trigger emergency alert
+      <div className="absolute -bottom-8 left-0 right-0 text-center animate-fade-in">
+        <p className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] opacity-60">
+          Tap to trigger SOS
         </p>
       </div>
     </div>

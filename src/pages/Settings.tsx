@@ -1,7 +1,6 @@
 import { ArrowLeft, Shield, Bell, MapPin, Mic, Volume2, Vibrate, Moon, Info, LogOut } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Switch } from '@/components/ui/switch';
-import { NavBar } from '@/components/NavBar';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -82,16 +81,16 @@ const Settings = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background safe-area-inset pb-24">
+    <div className="flex flex-col bg-background min-h-full">
       {/* Header */}
-      <header className="px-4 pt-4 pb-6">
-        <div className="flex items-center gap-4 mb-2">
-          <Link to="/" className="p-2 -ml-2 rounded-xl hover:bg-secondary">
+      <header className="px-5 pt-6 pb-4 border-b border-border/10 bg-background/60 backdrop-blur-xl sticky top-0 z-50">
+        <div className="flex items-center gap-4">
+          <Link to="/" className="p-2 -ml-2 rounded-xl hover:bg-secondary/50 transition-colors">
             <ArrowLeft className="w-6 h-6" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-            <p className="text-sm text-muted-foreground">Configure your preferences</p>
+            <h1 className="text-xl font-black text-foreground tracking-tight">System Settings</h1>
+            <p className="text-[9px] text-muted-foreground font-extrabold uppercase tracking-widest">Configuration Center</p>
           </div>
         </div>
       </header>
@@ -171,8 +170,6 @@ const Settings = () => {
           </button>
         </div>
       </main>
-
-      <NavBar />
     </div>
   );
 };

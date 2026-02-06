@@ -8,10 +8,10 @@ interface EmergencyContactCardProps {
   showActions?: boolean;
 }
 
-export const EmergencyContactCard = ({ 
-  contact, 
+export const EmergencyContactCard = ({
+  contact,
   onDelete,
-  showActions = true 
+  showActions = true
 }: EmergencyContactCardProps) => {
   return (
     <div className="glass-card rounded-2xl p-4 flex items-center justify-between">
@@ -25,9 +25,7 @@ export const EmergencyContactCard = ({
           <div className="flex items-center gap-2 mt-1">
             <Phone className="w-3 h-3 text-muted-foreground" />
             <span className="text-xs text-muted-foreground">{contact.phone}</span>
-            {contact.whatsappEnabled && (
-              <MessageCircle className="w-3 h-3 text-accent ml-2" />
-            )}
+
           </div>
         </div>
       </div>

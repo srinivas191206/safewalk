@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Geolocation } from '@capacitor/geolocation';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
+import SosSms from '@/plugins/SosSmsPlugin';
 
 type Step = 'welcome' | 'phone' | 'permissions' | 'complete';
 
@@ -74,40 +75,58 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
   };
 
   const handleRequestPermissions = async () => {
+    let permissionResults: string[] = [];
+
+    // 1. Request Location
     try {
-      // 1. Request Location
       const locPerm = await Geolocation.requestPermissions();
-      console.log('Location permission:', locPerm);
-
-      // 2. Request Microphone (via VoiceRecorder)
-      const micPerm = await VoiceRecorder.requestAudioRecordingPermission();
-      console.log('Mic permission:', micPerm);
-
-      // 3. Request Speech Recognition
-      const speechPerm = await SpeechRecognition.requestPermissions();
-      console.log('Speech permission:', speechPerm);
-
-      // 4. Request SMS (via SmsSender)
-      try {
-        const { SmsSender } = await import('capacitor-sms-sender');
-        const smsPerm = await SmsSender.requestPermissions();
-        console.log('SMS permission:', smsPerm);
-      } catch (e) {
-        console.warn('SMS plugin permission request failed (maybe not on Android):', e);
-      }
-
-      // 5. Request Notifications
-      if ('Notification' in window) {
-        await Notification.requestPermission();
-      }
-
-      toast.success('All permissions configured');
-      setStep('complete');
-    } catch (error) {
-      console.error('Permission error:', error);
-      toast.error('Failed to request some permissions. Please enable them in settings.');
-      setStep('complete'); // Still allow moving forward but warn
+      permissionResults.push(`Location: ${locPerm.location}`);
+    } catch (e) {
+      permissionResults.push('Location: failed');
     }
+
+    // 2. Request Microphone (via VoiceRecorder)
+    try {
+      const micPerm = await VoiceRecorder.requestAudioRecordingPermission();
+      permissionResults.push(`Microphone: ${micPerm.value ? 'granted' : 'denied'}`);
+    } catch (e) {
+      permissionResults.push('Microphone: failed');
+    }
+
+    // 3. Request Speech Recognition
+    try {
+      const speechPerm = await SpeechRecognition.requestPermissions();
+      permissionResults.push(`Speech: ${speechPerm.speechRecognition}`);
+    } catch (e) {
+      permissionResults.push('Speech: failed');
+    }
+
+    // 4. Request SMS - CRITICAL for SOS
+    try {
+      const smsPerm = await SosSms.requestPermissions();
+      const isGranted = smsPerm.sms === 'granted' && smsPerm.phone === 'granted' && smsPerm.notifications === 'granted';
+      permissionResults.push(`SMS System: ${isGranted ? 'granted ✓' : 'partial/denied ✗'}`);
+      if (!isGranted) {
+        toast.error('All SMS & Phone permissions are required for reliable SOS alerts.');
+      }
+    } catch (e) {
+      permissionResults.push('SMS: error');
+      console.error('SMS permission error:', e);
+    }
+
+    // 5. Request Notifications
+    try {
+      if ('Notification' in window) {
+        const notifPerm = await Notification.requestPermission();
+        permissionResults.push(`Notifications: ${notifPerm}`);
+      }
+    } catch (e) {
+      permissionResults.push('Notifications: failed');
+    }
+
+    console.log('Permission Results:', permissionResults);
+    toast.success('Permissions configured!');
+    setStep('complete');
   };
 
   const handleComplete = () => {
@@ -133,12 +152,12 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
       {/* Welcome Step */}
       {step === 'welcome' && (
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center mb-6">
-            <Shield className="w-12 h-12 text-primary" />
+          <div className="w-28 h-28 rounded-3xl bg-primary/10 flex items-center justify-center mb-8 border border-primary/20 overflow-hidden shadow-glow-red/20 shadow-2xl scale-110">
+            <img src="/logo.png" alt="Safe Walk" className="w-full h-full object-cover" />
           </div>
 
-          <h1 className="text-3xl font-bold text-foreground mb-2">Guardian Mode</h1>
-          <p className="text-muted-foreground mb-8">Your personal safety companion</p>
+          <h1 className="text-4xl font-black text-foreground mb-2 uppercase tracking-tight">Safe <span className="text-primary italic">Walk</span></h1>
+          <p className="text-muted-foreground font-medium mb-10 text-lg">Your elite personal safety companion</p>
 
           <div className="space-y-4 w-full max-w-sm mb-12">
             {features.map(({ icon: Icon, label }) => (
@@ -154,10 +173,10 @@ const Onboarding = ({ onComplete }: OnboardingProps) => {
           <Button
             onClick={() => setStep('phone')}
             size="lg"
-            className="w-full max-w-sm h-14 text-lg"
+            className="w-full max-w-sm h-16 text-lg font-black uppercase tracking-widest bg-primary hover:bg-primary/90 shadow-glow-red active:scale-95 transition-all"
           >
-            Get Started
-            <ArrowRight className="w-5 h-5 ml-2" />
+            Initiate Setup
+            <ArrowRight className="w-6 h-6 ml-3" />
           </Button>
         </div>
       )}
